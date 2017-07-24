@@ -30,7 +30,8 @@ class SSD(nn.Module):
         self.num_classes = num_classes
         # TODO: implement __call__ in PriorBox
         self.priorbox = PriorBox(v2)
-        self.priors = Variable(self.priorbox.forward(), volatile=True)
+        # Added requires_grad=False
+        self.priors = Variable(self.priorbox.forward(), volatile=True, requires_grad=False)
         self.size = 300
 
         # SSD network

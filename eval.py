@@ -33,6 +33,7 @@ else:
 def str2bool(v):
     return v.lower() in ("yes", "true", "t", "1")
 
+''' removed to import a function - TODO: extract that to  new file?
 parser = argparse.ArgumentParser(description='Single Shot MultiBox Detection')
 parser.add_argument('--trained_model', default='weights/ssd300_mAP_77.43_v2.pth',
                     type=str, help='Trained state_dict file path to open')
@@ -59,6 +60,7 @@ else:
 annopath = os.path.join(args.voc_root, 'VOC2007', 'Annotations', '%s.xml')
 imgpath = os.path.join(args.voc_root, 'VOC2007', 'JPEGImages', '%s.jpg')
 imgsetpath = os.path.join(args.voc_root, 'VOC2007', 'ImageSets', 'Main', '{:s}.txt')
+'''
 YEAR = '2007'
 devkit_path = VOCroot + 'VOC' + YEAR
 dataset_mean = (104, 117, 123)
