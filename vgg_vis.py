@@ -99,8 +99,9 @@ while n_iter <= max_iter:
     optimizer.zero_grad()
     output = net(opt_img)
     class_loss = -output[0,target_class]
-    l2_loss = lam * (opt_img**2).mean()
-    loss = class_loss + l2_loss
+    l2_loss = Variable(torch.zeros(1))
+    #l2_loss = lam * (opt_img**2).mean()
+    loss = class_loss# + l2_loss
     #print loss and show intermediate result image
     print('iter: %d, total loss: %.3f, class loss: %.3f, l2 loss: %.3f'%(n_iter, loss.data[0], class_loss.data[0], l2_loss.data[0]))
     #plt.imshow(postp(opt_img.data.clone().squeeze()))
@@ -110,7 +111,7 @@ while n_iter <= max_iter:
     optimizer.step()
     n_iter +=1
 
-postp(opt_img.data.clone().squeeze()).save('vis/new_new_new_goose' + str(args.lr) + '.png')
+postp(opt_img.data.clone().squeeze()).save('new/goose_min-l2_' + str(max_iter) + '_' + str(lr) + '.png')
 #cv2.imwrite(args.save_folder + 'cup' + '.png', postp(opt_img.data.clone().squeeze()))
 
 

@@ -1,0 +1,21 @@
+TODO: tudreport
+
+
+VGG:
+
+First I tried to reproduce the results from \cite{...} with a vgg network. As examples I used the category goose, as an example of this category is also provided by the paper.\\
+The objective of the optimization is, to maximize the score for this categorization network. One na"ive loss function would therefor be $-score(category)$. One problem is, that the output of the network - i.a. the score - seems to often increase, with the input. Therefore the it is possible, that this loss function leads to chaos.
+A solution is an additional loss, that can be added to the loss function and ensures, that the values of the image don't become to big: TODO formula
+With the combined loss, the methods produces good results, that are comparable to the result of the paper.\\
+
+Another loss function instead of the negative class score, that came to my mind, was $\dfrac{1}{score(category)}$.
+But experiments with this function showed, that it seems to be not useful for the task.
+
+SSD:
+
+For this network I chose the category horse, as the implementation I used was trained for other categories, than the 1000 image net categories.\\
+As the ssd network is an object detection network and no categorization network, the loss function, that I used for the vgg network, can not be used directly here.
+There are different so called prior boxes used in the network, that determine, where it looks for the objects. When I tried to use the biggest of them and maximize the category score as for the vgg network and added an additional term, that should ensure, that the prediction for this box is localized at the whole image, it produced bad results. Also it can be seen, that it still concentrates on the upper left part.\\
+The second loss function I tried was, to maximize the category score for all prior box prediction. In the result, can be seen, that there are very many little structures, that might be horses, but that are not that clear.\\
+Third I used the criterion, that was also used, when training the network. It computes an localization and an confidence loss for a given target, for which I chose the wanted category and as boundaries the whole image. This loss produced the best results.\\
+This loss I used, to visualize a smaller (1/4) object at the center of the image. There are no big differences to the bigger version...

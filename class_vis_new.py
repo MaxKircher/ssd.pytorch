@@ -26,10 +26,10 @@ parser.add_argument('--trained_model', default='weights/v2.pth',
 parser.add_argument('--save_folder', default='new/', type=str,
                     help='File path to save results')
 parser.add_argument('--lr', '--learning-rate', default=1, type=float, help='initial learning rate')
-parser.add_argument('--lam', default=10, type=float, help='weighting of l2 loss')
+parser.add_argument('--lam', default=1e4, type=float, help='weighting of l2 loss')
 parser.add_argument('--refine', default='', type=str, help='when set, the given image is refined')
 parser.add_argument('--iterations', default=100, type=int, help='How long the class model shall be optimized')
-parser.add_argument('--classes', default=['tvmonitor'], nargs='+', help='The class, that shal be recognised in the image')
+parser.add_argument('--classes', default=['horse'], nargs='+', help='The class, that shal be recognised in the image')
 args = parser.parse_args()
 
 if not os.path.exists(args.save_folder):
@@ -65,9 +65,9 @@ postpa = transforms.Compose([
 postpb = transforms.Compose([transforms.ToPILImage()])
 def postp(tensor): # to clip results in the range [0,1]
     tensor = tensor.cpu()
-    #t = postpa(tensor)
-    #t[t>1] = 1
-    #t[t<0] = 0
+    t = postpa(tensor)
+    t[t>1] = 1
+    t[t<0] = 0
     img = postpb(tensor)
     return img
 
@@ -89,34 +89,48 @@ for category in args.classes:
     for iteration in range(1, args.iterations):
         out = net(input)
 
-
         targets = torch.zeros(1,1,5)
         targets[0,0,2] = 1
         targets[0,0,3] = 1
         targets[0,0,4] = category_index
+        '''#L4:
+        targets[0,0,0] = 0.25
+        targets[0,0,1] = 0.25
+        targets[0,0,2] = 0.75
+        targets[0,0,3] = 0.75'''
+
         targets = Variable(targets, requires_grad=False)
 
-
-        loss_l, loss_c = criterion(out, targets)
-
-
-        #print(out)
-        #break
-        class_loss = -(out[1][0, :, category_index].mean() + 0.001*out[1][0, :, category_index].max())
-        l2_loss = args.lam * (input**2).mean()
-        loss = loss_l + loss_c + l2_loss + class_loss
-        print(loss)
-        #break
-        # backprop
-        optimizer.zero_grad()
         #loss_l, loss_c = criterion(out, targets)
-        #loss = loss_l + loss_c
-        if iteration % 2000 == 0:
-            print('loss' + str(loss))
-            #im = np.swapaxes(input.data.cpu().numpy()[0],0,2)
-            #plt.imshow(im)
-            #plt.draw()
-        if (iteration % round(args.iterations/2)) == 0:
+        #class_loss = -(out[1][0, :, category_index].mean() + 0.001*out[1][0, :, category_index].max())
+
+        '''for i, l in enumerate(out[2]):
+            out[2][i] = (l-targets)**2
+        v, i = out[2].sum(1).min(0)
+        print(v)
+        print(out[2][8693])
+        break'''
+
+        l2_loss = args.lam * (input**2).mean()
+
+        '''#L1:
+        class_loss = -(out[1][0, 8693, category_index] + (out[0][0, 8693, :] - targets).sum())
+        loss = l2_loss + class_loss
+
+        #L2:
+        class_loss = -(out[1][0, :, category_index].mean())
+        loss = l2_loss + class_loss'''
+
+        #L3:
+        loss_l, loss_c = criterion(out, targets)
+        loss = l2_loss + loss_l + loss_c
+
+        #L4: L3 with see target
+
+        optimizer.zero_grad()
+        print(str(iteration) + ': loss: ' + str(loss.data[0]))
+
+        if (iteration % round(args.iterations/3)) == 0:
             lr = lr / 10
             for param_group in optimizer.param_groups:
                 param_group['lr'] = lr
@@ -127,5 +141,5 @@ for category in args.classes:
         optimizer.step()
 
     im = postp(input.data.clone().squeeze())
-    im.save(args.save_folder + 'result_' + str(category) + '3.png')
+    im.save(args.save_folder + str(category) + '_l3_' + str(args.iterations) + '_' + str(lr) + '_lam' + str(args.lam) + '.png')
     #cv2.imwrite(args.save_folder + 'result_' + str(category) + '.png', im)
