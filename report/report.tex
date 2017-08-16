@@ -36,11 +36,12 @@ In this lab, the task was, to apply the methods presented in \cite{simonyan2013d
 
 First I tried to reproduce the results from \cite{simonyan2013deep} with a vgg network. As examples I used the category \textit{goose}, as an example of this category is also provided by the paper. (\ref{fig:1} a)\\
 The objective of the optimization is, to maximize the score for this categorization network. One na\"ive loss function would therefore be $-score(category)$ (\ref{fig:1} b). One problem is, that the output of the network - i.a. the score - seems to often increase, with the input. Therefore the it is possible, that this loss function leads to chaos (\ref{fig:1} c).
-A solution is an additional loss, that can be added to the loss function and ensures, that the values of the image don't become to big: Each pixel is squared and the mean over all pixel values is computed. (short: sq) (\ref{fig:1} d-i)\\
+A solution is an additional loss, that can be added to the loss function and ensures, that the values of the image don't become to big: Each pixel is squared and the mean over all pixel values is computed. (short: sq) (\ref{fig:1} d-h)\\
 With the combined loss, the methods produces good results, that are comparable to the result of the paper.\\
 % lam 1e4
+It can be seen, that a learning rate of 1 produces good results, while the results with to high or low learning rates are not that good (\ref{fig:1} g,h).
 Another loss function instead of the negative class score, that came to my mind, was $\dfrac{1}{score(category)}$.
-But experiments with this function showed, that it seems to be not useful for the task (\ref{fig:1} j-m).
+But experiments with this function showed, that it seems to be not useful for the task (\ref{fig:1} i-l).
 
 \begin{figure}
 \centering
@@ -48,15 +49,14 @@ But experiments with this function showed, that it seems to be not useful for th
 \subfigure[loss:-sc,lr:1,it:100]{\includegraphics[scale=0.5]{../new/goose_min-l2_100_1,0.png}}
 \subfigure[loss:-sc,lr:1,it:500]{\includegraphics[scale=0.5]{../new/goose_min-l2_500_1,0.png}}
 \subfigure[loss:-sc+sq,lr:1,it:100]{\includegraphics[scale=0.5]{../new/goose_min_100_1,0.png}}
-\subfigure[loss:1/sc,lr:5,it:500]{\includegraphics[scale=0.5]{../new/goose_min_500_0,1.png}}
-\subfigure[loss:1/sc,lr:5,it:500]{\includegraphics[scale=0.5]{../new/goose_min_500_0,5.png}}
-\subfigure[loss:1/sc,lr:5,it:500]{\includegraphics[scale=0.5]{../new/goose_min_500_1,0.png}}
-\subfigure[loss:1/sc,lr:5,it:500]{\includegraphics[scale=0.5]{../new/goose_min_500_5.png}}
-\subfigure[loss:1/sc,lr:5,it:500]{\includegraphics[scale=0.5]{../new/goose_min_1000_1,0.png}}
-\subfigure[loss:1/sc,lr:5,it:500]{\includegraphics[scale=0.5]{../new/goose_div_500_5,0.png}}
-\subfigure[loss:1/sc,lr:5,it:500]{\includegraphics[scale=0.5]{../new/goose_div_1000_1,0.png}}
-\subfigure[loss:1/sc,lr:5,it:500]{\includegraphics[scale=0.5]{../new/goose_div-l2_100_1,0.png}}
+\subfigure[loss:-sc+sq,lr:1,it:500]{\includegraphics[scale=0.5]{../new/goose_min_500_1,0.png}}
+\subfigure[loss:-sc+sq,lr:1,it:1000]{\includegraphics[scale=0.5]{../new/goose_min_1000_1,0.png}}
+\subfigure[loss:-sc+sq,lr:5,it:500]{\includegraphics[scale=0.5]{../new/goose_min_500_5.png}}
+\subfigure[loss:-sc+sq,lr:0.1,it:500]{\includegraphics[scale=0.5]{../new/goose_min_500_0,1.png}}
+\subfigure[loss:1/sc,lr:1,it:100]{\includegraphics[scale=0.5]{../new/goose_div-l2_100_1,0.png}}
 \subfigure[loss:1/sc,lr:5,it:500]{\includegraphics[scale=0.5]{../new/goose_div-l2_500_5,0.png}}
+\subfigure[loss:1/sc+sq,lr:5,it:500]{\includegraphics[scale=0.5]{../new/goose_div_500_5,0.png}}
+\subfigure[loss:1/sc+sq,lr:1,it:1000]{\includegraphics[scale=0.5]{../new/goose_div_1000_1,0.png}}
 \caption{Results of the class model visualization a vgg network for the category goose. lr is the used learning rate, it the number of iterations}
 \label{fig:1}
 \end{figure}
