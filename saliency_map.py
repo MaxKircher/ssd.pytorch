@@ -23,7 +23,7 @@ parser = argparse.ArgumentParser(description='Class Model Visualization for the 
 parser.add_argument('input', help='The image, for which the saliency map shall be computed')
 parser.add_argument('--trained_model', default='weights/v2.pth',
                     type=str, help='Trained state_dict file path to open')
-parser.add_argument('--save_folder', default='vis/', type=str,
+parser.add_argument('--save_folder', default='sal/', type=str,
                     help='File path to save results')
 parser.add_argument('--classes', default=VOC_CLASSES, nargs='+', help='The class, that shal be recognised in the image')
 args = parser.parse_args()
@@ -42,15 +42,15 @@ for param in net.parameters():
 net.eval()
 
 #Get a 300x300 image out of the given image
-im = np.swapaxes(cv2.imread(args.input),0,2).astype('f')
+im = np.swapaxes(cv2.imread(args.save_folder+args.input),0,2).astype('f')
 x_off = int((np.size(im, 1)-300)/2)
 y_off = int((np.size(im, 2)-300)/2)
 im = im[:,x_off:300+x_off,y_off:300+y_off]
 input = Variable((torch.from_numpy(np.expand_dims(im, axis=0)).cuda()), requires_grad=True)
 
 # Save the 300x300 image
-im = np.swapaxes(input.data.cpu().numpy()[0],0,2)
-cv2.imwrite(args.save_folder + 'small_input.png', im)
+#im = np.swapaxes(input.data.cpu().numpy()[0],0,2)
+#cv2.imwrite(args.save_folder + 'small_input.png', im)
 
 for category in args.classes:
     category_index = VOC_CLASSES.index(category)
@@ -67,15 +67,28 @@ for category in args.classes:
 
     out = net(input)
 
-    # backprop
-    loss_l, loss_c = criterion(out, targets)
-    loss = loss_l + loss_c
+    #sim to L1 without location
+    loss = -(out[1][0, :, category_index+1].max())
+
+    #5b:
+    #loss = (-out[1][0, :, category_index+1]).sort()[0][0:50].mean()
+
+
+    # L3:
+    #loss_l, loss_c = criterion(out, targets)
+    #loss = loss_l + loss_c
+
+
+
+
     loss.backward()
     map = input.grad.data.cpu().numpy()[0]
     map = map.max(0)
     # Normalize, so gradients are visible:
     map = 255*map/map.max()
 
-    cv2.imwrite(args.save_folder + 'horse_saliency_' + str(category) + '.png', map)
+    vis = np.swapaxes(input.data.cpu().numpy()[0]+map, 0, 2)
+
+    cv2.imwrite(args.save_folder + args.input.split('.')[0] + '_saliency_' + str(category) + '.png', vis)
 
     input.grad.data.zero_()
