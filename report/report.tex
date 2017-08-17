@@ -28,13 +28,15 @@
 
 \maketitle
 
-In this lab, the task was, to apply the methods presented in \cite{simonyan2013deep} to the network of \cite{liu2016ssd}.
-
+In this lab, the task was, to apply the visualisation methods presented in \cite{simonyan2013deep} to the object detection network of \cite{liu2016ssd}.
 
 \section{Class Model Visualization}
+
+The first method of the paper is the class model visualization. Here the structures, that lead the network to classify an image in a specific class shall be visualized. With a classical backward pass with respect to the input image, the gradients are computed, that can then be used to optimise the image.
+
 \subsection{VGG}
 
-First I tried to reproduce the results from \cite{simonyan2013deep} with a vgg network. As examples I used the category \textit{goose}, as an example of this category is also provided by the paper. (\ref{fig:1} a)\\
+First I tried to reproduce the results from \cite{simonyan2013deep} with a vgg11 network as proposed in \cite{simonyan2014very}. As examples I used the category \textit{goose}, as an example of this category is also provided by the paper. (\ref{fig:1} a)\\
 The objective of the optimization is, to maximize the score for this categorization network. One na\"ive loss function would therefore be $-score(category)$ (\ref{fig:1} b). One problem is, that the output of the network - i.a. the score - seems to often increase, with the input. Therefore the it is possible, that this loss function leads to chaos (\ref{fig:1} c).
 A solution is an additional loss, that can be added to the loss function and ensures, that the values of the image don't become to big: Each pixel is squared and the mean over all pixel values is computed. (short: sq) (\ref{fig:1} d-h)\\
 With the combined loss, the methods produces good results, that are comparable to the result of the paper.\\
@@ -66,16 +68,38 @@ But experiments with this function showed, that it seems to be not useful for th
 
 For this network I chose the category \textit{horse}, as the implementation I used was trained for other categories, than the 1000 image net categories.\\
 As the ssd network is an object detection network and no categorization network, the loss function, that I used for the vgg network, can not be used directly here.
-There are different so called prior boxes used in the network, that determine, where it looks for the objects. When I tried to use the biggest of them and maximize the category score as for the vgg network and added an additional term, that should ensure, that the prediction for this box is localized at the whole image, it produced bad results. Also it can be seen, that it still concentrates on the upper left part.\\
-The second loss function I tried was, to maximize the category score for all prior box prediction. In the result, can be seen, that there are very many little structures, that might be horses, but that are not that clear.\\
-Third I used the criterion, that was also used, when training the network. It computes an localization and an confidence loss for a given target, for which I chose the wanted category and as boundaries the whole image. This loss produced the best results.\\
-This loss I used, to visualize a smaller (1/4) object at the center of the image. There are no big differences to the bigger version...
+I tried different loss functions:
+\begin{itemize}
+\item[1.]There are different so called prior boxes used in the network, that determine, where it looks for the objects. I tried to use the biggest of them and maximize the category score as for the vgg network and added an additional term, that should ensure, that the prediction for this box is localized at the whole image That produced quite good results, but it can be seen, that it still concentrates on the upper left part, where the prior box is. (see Fig \ref{fig:2} a-c)\\
+\item[2.]The second loss function I tried was, to maximize the category score for all prior box prediction. In the result, can be seen, that there are very many little structures, that might be horses, but that are not that clear (see Fig \ref{fig:2} d). When the optimization is continued with a smaller learning rate, it becomes even less clear, but there arise some slightly bigger ones, that are also more clear. (see Fig \ref{fig:2} e,f)\\
+\item[3.]Third I used the criterion, that was also used, when training the network. It computes an localization and an confidence loss for a given target, for which I chose the wanted category and as boundaries the whole image. This loss produced results similar to the first loss, but it can be seen, that the optimization is relative costly. (see Fig \ref{fig:2} g-i)\\
+\item[4.]This loss I used, to visualize a smaller (1/4) object at the center of the image. There are no big differences to the bigger version... TODO
+\end{itemize}
+
+TODO decrease lambda for l3?
+
+\begin{figure}
+\centering
+\subfigure[loss:1,lr:1,it:100$\lambda$:100]{\includegraphics[width=0.32\textwidth]{../new/horse_l1_100_1_lam100,0.png}}
+\subfigure[loss:1,lr:1,it:500$\lambda$:100]{\includegraphics[width=0.32\textwidth]{../new/horse_l1_500_1_lam100,0.png}}
+\subfigure[loss:1,lr:1-0.01,it:1000$\lambda$:100]{\includegraphics[width=0.32\textwidth]{../new/horse_l1_1000_0,001_lam100,0.png}}
+\subfigure[loss:2,lr:1,it:100$\lambda$:10]{\includegraphics[width=0.32\textwidth]{../new/horse_l2_100_1_lam10,0.png}}
+\subfigure[loss:2,lr:1-0.01,it:500$\lambda$:10]{\includegraphics[width=0.32\textwidth]{../new/horse_l2_500_1-0,1-0,01_lam10,0.png}}
+\subfigure[loss:2,lr:1-0.01,it:1000$\lambda$:10]{\includegraphics[width=0.32\textwidth]{../new/horse_l2_1000_1-0,1-0,01_lam10,0.png}}
+\subfigure[loss:3,lr:1,it:500$\lambda$:10000]{\includegraphics[width=0.32\textwidth]{../new/horse_l3_500_1_lam10000,0.png}}
+\subfigure[loss:3,lr:1-0.01,it:1000$\lambda$:100]{\includegraphics[width=0.32\textwidth]{../new/horse_l3_1000_1-0,1-0,01_lam100,0.png}}
+\subfigure[loss:3,lr:0.1,it:500$\lambda$:10000]{\includegraphics[width=0.32\textwidth]{../new/horse_l3_500_0,1_lam10000,0.png}}
+\subfigure[loss:4,lr:0.1,it:500$\lambda$:10000]{\includegraphics[width=0.32\textwidth]{../new/horse_l4_500_0,1_lam10000,0.png}}
+\caption{Results of the class model visualization a vgg network for the category goose. lr is the used learning rate, it the number of iterations}
+\label{fig:2}
+\end{figure}
 
 
 \section{Image-Specific Class Saliency Visualisation}
 \label{sec:1}
+ The second method presented in \cite{simonyan2013deep} is a saliency visualization: It is computed, which parts of a given image are important, to classify it to a given class. To do that, again the same gradients are computed, but this time, they are not used for optimisation. It is assumed, that pixels, that have high gradients are especially important for choosing the given class and therefore contain the object.
 
-
+\subsection{SSD}
 
 
 
