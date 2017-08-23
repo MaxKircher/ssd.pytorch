@@ -93,11 +93,11 @@ for category in args.classes:
         targets[0,0,2] = 1
         targets[0,0,3] = 1
         targets[0,0,4] = category_index
-        '''#L4:
+        #L4:
         targets[0,0,0] = 0.25
         targets[0,0,1] = 0.25
         targets[0,0,2] = 0.75
-        targets[0,0,3] = 0.75'''
+        targets[0,0,3] = 0.75
 
         targets = Variable(targets, requires_grad=False)
 
@@ -130,18 +130,17 @@ for category in args.classes:
         optimizer.zero_grad()
         print(str(iteration) + ': loss: ' + str(loss.data[0]))
 
-        if (iteration % round(args.iterations/3)) == 0:
+        '''if (iteration % round(args.iterations/3)) == 0:
             lr = lr / 10
-            args.lam = args.lam/10
             for param_group in optimizer.param_groups:
                 param_group['lr'] = lr
             print('Adjusted learning rate to ' + str(lr))
             print('iteration: ' + str(iteration) + ' loss: ' + str(loss))
-	
+	'''
 
         loss.backward()
         optimizer.step()
 
     im = postp(input.data.clone().squeeze())
-    im.save(args.save_folder + str(category) + '_l3_' + str(args.iterations) + '_' + str(lr) + '_lam' + str(args.lam) + '.png')
+    im.save(args.save_folder + str(category) + '_l4_' + str(args.iterations) + '_' + str(lr) + '_lam' + str(args.lam) + '.png')
     #cv2.imwrite(args.save_folder + 'result_' + str(category) + '.png', im)
