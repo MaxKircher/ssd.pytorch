@@ -89,10 +89,10 @@ for category in args.classes:
     for iteration in range(1, args.iterations):
         out = net(input)
 
-        targets = torch.zeros(1,1,4)
+        targets = torch.zeros(1,1,5)
         targets[0,0,2] = 1
         targets[0,0,3] = 1
-        #targets[0,0,4] = category_index
+        targets[0,0,4] = category_index
         '''#L4:
         targets[0,0,0] = 0.25
         targets[0,0,1] = 0.25
@@ -117,13 +117,13 @@ for category in args.classes:
         class_loss = -(out[1][0, 8693, category_index+1] + (out[0][0, 8693, :] - targets).sum())
         loss = l2_loss + class_loss
 
-        '''#L2:
+        #L2:
         class_loss = -(out[1][0, :, category_index+1].mean())
         loss = l2_loss + class_loss
 
         '''#L3:
         loss_l, loss_c = criterion(out, targets)
-        loss = l2_loss + loss_l + loss_c'''
+        loss = l2_loss + loss_l + loss_c
 
         #L4: L3 with see target
 
@@ -136,10 +136,11 @@ for category in args.classes:
                 param_group['lr'] = lr
             print('Adjusted learning rate to ' + str(lr))
             print('iteration: ' + str(iteration) + ' loss: ' + str(loss))
+	
 
         loss.backward()
         optimizer.step()
 
     im = postp(input.data.clone().squeeze())
-    im.save(args.save_folder + str(category) + '_l2_' + str(args.iterations) + '_' + str(lr) + '_lam' + str(args.lam) + '.png')
+    im.save(args.save_folder + str(category) + '_l3_' + str(args.iterations) + '_' + str(lr) + '_lam' + str(args.lam) + '.png')
     #cv2.imwrite(args.save_folder + 'result_' + str(category) + '.png', im)
