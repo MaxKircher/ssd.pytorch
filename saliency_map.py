@@ -68,14 +68,14 @@ for category in args.classes:
     out = net(input)
 
     #sim to L1 without location
-    loss = -(out[1][0, :, category_index+1].max())
+    #loss = -(out[1][0, :, category_index+1].max())
 
     #5b:
     #loss = (-out[1][0, :, category_index+1]).sort()[0][0:50].mean()
 
 
     # L3:
-    #loss_l, loss_c = criterion(out, targets)
+    loss_l, loss = criterion(out, targets)
     #loss = loss_l + loss_c
 
 
@@ -88,7 +88,7 @@ for category in args.classes:
     map = 255*map/map.max()
 
     vis = np.swapaxes(input.data.cpu().numpy()[0]+map, 0, 2)
-    cv2.imwrite(args.save_folder + args.input.split('.')[0] + '_saliency_' + str(category) + '.png', np.fliplr(np.rot90(map, k=3)))
-    cv2.imwrite(args.save_folder + args.input.split('.')[0] + '_both_' + str(category) + '.png', vis)
+    cv2.imwrite(args.save_folder + args.input.split('.')[0] + '_saliency_l3' + str(category) + '.png', np.fliplr(np.rot90(map, k=3)))
+    cv2.imwrite(args.save_folder + args.input.split('.')[0] + '_both_l3' + str(category) + '.png', vis)
 
     input.grad.data.zero_()
