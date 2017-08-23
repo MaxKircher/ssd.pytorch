@@ -132,6 +132,7 @@ for category in args.classes:
 
         if (iteration % round(args.iterations/3)) == 0:
             lr = lr / 10
+            args.lam = args.lam/10
             for param_group in optimizer.param_groups:
                 param_group['lr'] = lr
             print('Adjusted learning rate to ' + str(lr))
