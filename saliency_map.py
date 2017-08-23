@@ -88,7 +88,7 @@ for category in args.classes:
     map = 255*map/map.max()
 
     vis = np.swapaxes(input.data.cpu().numpy()[0]+map, 0, 2)
-    cv2.imwrite(args.save_folder + args.input.split('.')[0] + '_saliency_' + str(category) + '.png', np.rot90(map))
+    cv2.imwrite(args.save_folder + args.input.split('.')[0] + '_saliency_' + str(category) + '.png', np.rot90(map, k=3))
     cv2.imwrite(args.save_folder + args.input.split('.')[0] + '_both_' + str(category) + '.png', vis)
 
     input.grad.data.zero_()
