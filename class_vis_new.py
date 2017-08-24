@@ -73,10 +73,9 @@ def postp(tensor): # to clip results in the range [0,1]
 
 
 
-r = [0, 5, 10, 100, 1000, 2000, 5000, 5001, 8692, 8693, 8694]
 
-for i in r:
-    category = 'horse'
+for category in args.classes:
+    i = 8729
     category_index = VOC_CLASSES.index(category)
     print('New category: ' + category + ' (' + str(category_index) + ')')
     if args.refine == '':
