@@ -73,9 +73,10 @@ def postp(tensor): # to clip results in the range [0,1]
 
 
 
+r = [0, 5, 10, 100, 1000, 2000, 5000, 5001, 8692, 8693, 8694]
 
-
-for category in args.classes:
+for i in r:
+    category = 'horse'
     category_index = VOC_CLASSES.index(category)
     print('New category: ' + category + ' (' + str(category_index) + ')')
     if args.refine == '':
@@ -129,7 +130,7 @@ for category in args.classes:
         #L5: L1 with see target
 
         #L6: L1 without location:
-        class_loss = -(out[1][0, 8693, category_index+1])
+        class_loss = -(out[1][0, i, category_index+1])
         loss = l2_loss + class_loss
 
         optimizer.zero_grad()
@@ -147,5 +148,5 @@ for category in args.classes:
         optimizer.step()
 
     im = postp(input.data.clone().squeeze())
-    im.save(args.save_folder + str(category) + '_l6_' + str(args.iterations) + '_' + str(lr) + '_lam' + str(args.lam) + '.png')
+    im.save(args.save_folder + str(category) + '_l6_box' + str(i) + '_' + str(args.iterations) + '_' + str(lr) + '_lam' + str(args.lam) + '.png')
     #cv2.imwrite(args.save_folder + 'result_' + str(category) + '.png', im)
