@@ -128,24 +128,24 @@ for category in args.classes:
         #L4: L3 with see target
         #L5: L1 with see target
 
-        #L6: L1 without location:
+        #L1n: L1 without location:
         class_loss = -(out[1][0, i, category_index+1])
         loss = l2_loss + class_loss
 
         optimizer.zero_grad()
         print(str(iteration) + ': loss: ' + str(loss.data[0]))
 
-        '''if (iteration % round(args.iterations/3)) == 0:
+        if (iteration % round(args.iterations/3)) == 0:
             lr = lr / 10
             for param_group in optimizer.param_groups:
                 param_group['lr'] = lr
             print('Adjusted learning rate to ' + str(lr))
             print('iteration: ' + str(iteration) + ' loss: ' + str(loss))
-	'''
+	
 
         loss.backward()
         optimizer.step()
 
     im = postp(input.data.clone().squeeze())
-    im.save(args.save_folder + str(category) + '_l6_box' + str(i) + '_' + str(args.iterations) + '_' + str(lr) + '_lam' + str(args.lam) + '.png')
+    im.save(args.save_folder + str(category) + '_l1n_' + str(args.iterations) + '_' + str(lr) + '_lam' + str(args.lam) + '.png')
     #cv2.imwrite(args.save_folder + 'result_' + str(category) + '.png', im)
