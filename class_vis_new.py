@@ -113,11 +113,11 @@ for category in args.classes:
 
         l2_loss = args.lam * (input**2).mean()
 
-        #L1:
+        '''#L1:
         class_loss = -(out[1][0, 8693, category_index+1] + (out[0][0, 8693, :] - targets).sum())
         loss = l2_loss + class_loss
 
-        '''#L2:
+        #L2:
         class_loss = -(out[1][0, :, category_index+1].mean())
         loss = l2_loss + class_loss
 
@@ -127,6 +127,10 @@ for category in args.classes:
 
         #L4: L3 with see target
         #L5: L1 with see target
+
+        #L6: L1 without location:
+        class_loss = -(out[1][0, 8693, category_index+1])
+        loss = l2_loss + class_loss
 
         optimizer.zero_grad()
         print(str(iteration) + ': loss: ' + str(loss.data[0]))
@@ -143,5 +147,5 @@ for category in args.classes:
         optimizer.step()
 
     im = postp(input.data.clone().squeeze())
-    im.save(args.save_folder + str(category) + '_l5_' + str(args.iterations) + '_' + str(lr) + '_lam' + str(args.lam) + '.png')
+    im.save(args.save_folder + str(category) + '_l6_' + str(args.iterations) + '_' + str(lr) + '_lam' + str(args.lam) + '.png')
     #cv2.imwrite(args.save_folder + 'result_' + str(category) + '.png', im)
