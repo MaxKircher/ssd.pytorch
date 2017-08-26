@@ -74,6 +74,7 @@ def postp(tensor): # to clip results in the range [0,1]
 
 
 
+
 for category in args.classes:
     category_index = VOC_CLASSES.index(category)
     print('New category: ' + category + ' (' + str(category_index) + ')')
@@ -116,27 +117,20 @@ for category in args.classes:
         class_loss = -(out[1][0, 8693, category_index+1] + (out[0][0, 8693, :] - targets).sum())
         loss = l2_loss + class_loss
 
-        #L2:
+        '''#L2:
         class_loss = -(out[1][0, :, category_index+1].mean())
         loss = l2_loss + class_loss
 
         #L3:
         loss_l, loss_c = criterion(out, targets)
-        loss = l2_loss + loss_l + loss_c
+        loss = l2_loss + loss_l + loss_c'''
 
         #L4: L3 with see target
         #L5: L1 with see target
 
-        #L1n: L1 without location:
-        i = 8729
-        class_loss = -(out[1][0, i, category_index+1])
-        loss = l2_loss + class_loss'''
-
-        #L5n new L5:
-        i = 8614
-        class_loss = -(out[1][0, i, category_index+1])
+        #L6: L1 without location
+        class_loss = -(out[1][0, 8693, category_index+1])
         loss = l2_loss + class_loss
-
 
 
         optimizer.zero_grad()
@@ -154,5 +148,5 @@ for category in args.classes:
         optimizer.step()
 
     im = postp(input.data.clone().squeeze())
-    im.save(args.save_folder + str(category) + '_l5n_' + str(args.iterations) + '_' + str(lr) + '_lam' + str(args.lam) + '.png')
+    im.save(args.save_folder + str(category) + '_l6_' + str(args.iterations) + '_' + str(lr) + '_lam' + str(args.lam) + '.png')
     #cv2.imwrite(args.save_folder + 'result_' + str(category) + '.png', im)
