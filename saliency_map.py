@@ -70,25 +70,29 @@ for category in args.classes:
     #sim to L1 without location
     #loss = -(out[1][0, :, category_index+1].max())
 
-    #5b:
-    #loss = (-out[1][0, :, category_index+1]).sort()[0][0:50].mean()
+    loss = (-out[1][0, :, category_index+1]).sort()[0]
 
+    for i in range(10):
+        #5b:
 
-    # L3:
-    loss_l, loss = criterion(out, targets)
-    #loss = loss_l + loss_c
+        # L3:
+        #loss_l, loss = criterion(out, targets)
+        #loss = loss_l + loss_c
+        print('No problem till here')
 
+        loss[i].backward(retain_variables=True)
+        map = input.grad.data.cpu().numpy()[0]
+        map = map.max(0)
+        # Normalize, so gradients are visible:
+        map = 255*map/map.max()
+        print('backward, grad ok')
 
+        vis = np.swapaxes(input.data.cpu().numpy()[0]+map, 0, 2)
+        cv2.imwrite(args.save_folder + args.input.split('.')[0] + '_saliency_b' + str(i) + '_' + str(category) + '.png', np.fliplr(np.rot90(map, k=3)))
+        cv2.imwrite(args.save_folder + args.input.split('.')[0] + '_both_b' + str(i) + '_' + str(category) + '.png', vis)
 
+        input.grad.data.zero_()
 
-    loss.backward()
-    map = input.grad.data.cpu().numpy()[0]
-    map = map.max(0)
-    # Normalize, so gradients are visible:
-    map = 255*map/map.max()
+        print('grad zero ok')
 
-    vis = np.swapaxes(input.data.cpu().numpy()[0]+map, 0, 2)
-    cv2.imwrite(args.save_folder + args.input.split('.')[0] + '_saliency_l3' + str(category) + '.png', np.fliplr(np.rot90(map, k=3)))
-    cv2.imwrite(args.save_folder + args.input.split('.')[0] + '_both_l3' + str(category) + '.png', vis)
-
-    input.grad.data.zero_()
+        continue
