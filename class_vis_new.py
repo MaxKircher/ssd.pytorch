@@ -88,10 +88,10 @@ for category in args.classes:
     for iteration in range(1, args.iterations):
         out = net(input)
 
-        targets = torch.zeros(1,1,5)
+        targets = torch.zeros(1,1,4)
         targets[0,0,2] = 1
         targets[0,0,3] = 1
-        targets[0,0,4] = category_index
+        #targets[0,0,4] = category_index
         #L4n:
         targets[0,0,0] = 0.26
         targets[0,0,1] = 0.26
@@ -118,24 +118,24 @@ for category in args.classes:
 
         #L2:
         class_loss = -(out[1][0, :, category_index+1].mean())
-        loss = l2_loss + class_loss'''
+        loss = l2_loss + class_loss
 
         #L3:
         loss_l, loss_c = criterion(out, targets)
         loss = l2_loss + loss_l + loss_c
 
-        '''#L4: L3 with see target
+        #L4: L3 with see target
         #L5: L1 with see target
 
         #L1n: L1 without location:
         i = 8729
         class_loss = -(out[1][0, i, category_index+1])
-        loss = l2_loss + class_loss
+        loss = l2_loss + class_loss'''
 
         #L5n new L5:
-        i = 8614
+        i = 8207
         class_loss = -(out[1][0, i, category_index+1])
-        loss = l2_loss + class_loss'''
+        loss = l2_loss + class_loss
 
 
 
@@ -154,5 +154,5 @@ for category in args.classes:
         optimizer.step()
 
     im = postp(input.data.clone().squeeze())
-    im.save(args.save_folder + str(category) + '_l4n_' + str(args.iterations) + '_' + str(lr) + '_lam' + str(args.lam) + '.png')
+    im.save(args.save_folder + str(category) + '_l5n_' + str(args.iterations) + '_' + str(lr) + '_lam' + str(args.lam) + '.png')
     #cv2.imwrite(args.save_folder + 'result_' + str(category) + '.png', im)
