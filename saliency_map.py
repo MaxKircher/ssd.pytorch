@@ -23,7 +23,7 @@ parser = argparse.ArgumentParser(description='Class Model Visualization for the 
 parser.add_argument('input', help='The image, for which the saliency map shall be computed')
 parser.add_argument('--trained_model', default='weights/v2.pth',
                     type=str, help='Trained state_dict file path to open')
-parser.add_argument('--save_folder', default='sal/', type=str,
+parser.add_argument('--save_folder', default='sal_comp/', type=str,
                     help='File path to save results')
 parser.add_argument('--classes', default=VOC_CLASSES, nargs='+', help='The class, that shal be recognised in the image')
 args = parser.parse_args()
@@ -43,10 +43,13 @@ net.eval()
 
 #Get a 300x300 image out of the given image
 im = np.swapaxes(cv2.imread(args.save_folder+args.input),0,2).astype('f')
-x_off = int((np.size(im, 1)-300)/2)
-y_off = int((np.size(im, 2)-300)/2)
-im = im[:,x_off:300+x_off,y_off:300+y_off]
-input = Variable((torch.from_numpy(np.expand_dims(im, axis=0)).cuda()), requires_grad=True)
+zeros = np.zeros((3, 300, 300)).astype('f')
+
+x_off = int(-(np.size(im, 1)-300)/2)
+y_off = int(-(np.size(im, 2)-300)/2)
+zeros[:,x_off:np.size(im, 1)+x_off,y_off:np.size(im, 2)+y_off] = im.astype('f')
+print(zeros.shape)
+input = Variable((torch.from_numpy(np.expand_dims(zeros, axis=0)).cuda()), requires_grad=True)
 
 # Save the 300x300 image
 #im = np.swapaxes(input.data.cpu().numpy()[0],0,2)
@@ -70,29 +73,26 @@ for category in args.classes:
     #sim to L1 without location
     #loss = -(out[1][0, :, category_index+1].max())
 
-    loss = (-out[1][0, :, category_index+1]).sort()[0]
+    loss = (-out[1][0, :, category_index+1]).sort()[0][0]
 
-    for i in range(10):
-        #5b:
+    #5b:
 
-        # L3:
-        #loss_l, loss = criterion(out, targets)
-        #loss = loss_l + loss_c
-        print('No problem till here')
+    # L3:
+    #loss_l, loss = criterion(out, targets)
+    #loss = loss_l + loss_c
+    print('No problem till here')
 
-        loss[i].backward(retain_variables=True)
-        map = input.grad.data.cpu().numpy()[0]
-        map = map.max(0)
-        # Normalize, so gradients are visible:
-        map = 255*map/map.max()
-        print('backward, grad ok')
+    loss.backward(retain_variables=True)
+    map = input.grad.data.cpu().numpy()[0]
+    map = map.max(0)
+    # Normalize, so gradients are visible:
+    map = 255*map/map.max()
+    print('backward, grad ok')
 
-        vis = np.swapaxes(input.data.cpu().numpy()[0]+map, 0, 2)
-        cv2.imwrite(args.save_folder + args.input.split('.')[0] + '_saliency_b' + str(i) + '_' + str(category) + '.png', np.fliplr(np.rot90(map, k=3)))
-        cv2.imwrite(args.save_folder + args.input.split('.')[0] + '_both_b' + str(i) + '_' + str(category) + '.png', vis)
+    vis = np.swapaxes(input.data.cpu().numpy()[0]+map, 0, 2)
+    cv2.imwrite(args.save_folder + args.input.split('.')[0] + '_saliency_' + str(category) + '.png', np.fliplr(np.rot90(map, k=3)))
+    cv2.imwrite(args.save_folder + args.input.split('.')[0] + '_both_' + str(category) + '.png', vis)
 
-        input.grad.data.zero_()
+    input.grad.data.zero_()
 
-        print('grad zero ok')
-
-        continue
+    print('grad zero ok')
